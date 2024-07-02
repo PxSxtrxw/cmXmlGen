@@ -93,21 +93,31 @@ function handleEventData(req, res, eventType, eventName) {
         }
 
         xmlGenerationPromise
-            .then(xml => {
-                // Mostrar XML generado en la consola
-                const xmlFormatted = formatXml(xml);
-                console.log('XML generado:\n', xmlFormatted);
-                infoLogger.info('-----------------------------------------------------------------------');
-                infoLogger.info(`${eventName} - ${eventType}`);
-                infoLogger.info('-----------------------------------------------------------------------');
-                infoLogger.info('XML generado:\n' + xmlFormatted);
-                infoLogger.info('-----------------------------------------------------------------------');
-                res.json({ message: 'XML generado correctamente', xml: xml });
-            })
-            .catch(error => {
-                errorLogger.error('Error al generar XML', { error });
-                res.status(500).json({ error: 'Error al generar XML' });
-            });
+        .then(xml => {
+            // Mostrar XML generado en la consola
+            const xmlFormatted = formatXml(xml);
+            infoLogger.info('-----------------------------------------------------------------------');
+            infoLogger.info(`${eventName} - ${eventType}`);
+            infoLogger.info('-----------------------------------------------------------------------');
+            infoLogger.info('XML generado:\n' + xmlFormatted);
+            infoLogger.info('-----------------------------------------------------------------------');
+            res.json({ message: 'XML generado correctamente', xml: xml });
+        })
+        .catch(error => {
+            // Capturar errores detallados
+            if (error.message) {
+                // Formatear mensaje de error detallado
+                const errorMessage = error.message.split(';').join(';\n');
+                errorLogger.error('-----------------------------------------------------------------------');
+                errorLogger.error(`Error al generar XML (${eventType}):\n  ${errorMessage}`);
+                errorLogger.error('-----------------------------------------------------------------------');
+            } else {
+                // Registrar error general
+                errorLogger.error(`Error al generar XML (${eventType}): ${error.stack || error.message}`);
+            }
+            res.status(500).json({ error: 'Error al generar XML' });
+        });
+
     } catch (error) {
         errorLogger.error('Error en el servidor', { error });
         res.status(500).json({ error: 'Error en el servidor' });
