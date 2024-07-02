@@ -29,4 +29,19 @@ Para iniciar el servidor de desarrollo, use el siguiente comando:
 ```bash
 node server
 ```
+El servidor se iniciará en http://localhost:3000.
+
+### Endpoints Disponibles
+
+El servidor expone varios endpoints para manejar diferentes eventos que requieren la generación de XML:
+
+- `/generar`: Genera un XML regular para un documento electrónico.
+- `/cancelacion`: Genera un XML para un evento de cancelación.
+- `/inutilizacion`: Genera un XML para un evento de inutilización.
+- `/conformidad`: Genera un XML para un evento de conformidad.
+- `/disconformidad`: Genera un XML para un evento de disconformidad.
+- `/desconocimiento`: Genera un XML para un evento de desconocimiento.
+- `/notificacion`: Genera un XML para un evento de notificación.
+
+
 
