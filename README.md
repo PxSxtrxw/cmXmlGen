@@ -20,7 +20,7 @@ npm install facturacionelectronicapy-xmlgen
 npm install express
 ```
 ```bash
-npm install winstone
+npm install winston
 ```
 ## Configuración
 
