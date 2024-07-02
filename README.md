@@ -15,3 +15,18 @@ Para instalar las dependencias necesarias, ejecute el siguiente comando en la te
 
 ```bash
 npm install
+```
+## Configuración
+
+Antes de ejecutar el servidor, asegúrese de configurar adecuadamente los parámetros y datos necesarios según la documentación de la SET. Los datos estáticos del contribuyente emisor (`params`) y los datos variables para cada documento electrónico (`data`) deben estar correctamente estructurados y proporcionados en formato JSON.
+
+## Uso
+
+### Ejecución del Servidor
+
+Para iniciar el servidor de desarrollo, use el siguiente comando:
+
+```bash
+npm start
+```
+
