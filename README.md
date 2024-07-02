@@ -14,7 +14,7 @@ Para utilizar este código, es necesario tener instalado:
 Para instalar las dependencias necesarias, ejecute el siguiente comando en la terminal:
 
 ```bash
-npm install
+npm install facturacionelectronicapy-xmlgen
 ```
 ## Configuración
 
@@ -27,6 +27,6 @@ Antes de ejecutar el servidor, asegúrese de configurar adecuadamente los parám
 Para iniciar el servidor de desarrollo, use el siguiente comando:
 
 ```bash
-npm start
+node server
 ```
 
