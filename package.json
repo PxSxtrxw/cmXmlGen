@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "express": "^4.19.2",
+    "facturacionelectronicapy-xmlgen": "^1.0.243",
+    "winston": "^3.13.0"
+  }
+}
