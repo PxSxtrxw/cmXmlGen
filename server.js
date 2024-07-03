@@ -68,9 +68,6 @@ function handleEventData(req, res, eventType, eventName) {
                 xmlGenerationPromise = xmlgen.generateXMLDE(json_data.params, json_data.data, options);
                 break;
             case 'cancelacion':
-                if (!json_data.data.cdc || json_data.data.cdc.trim() === '') {
-                    return res.status(400).json({ error: "Debe proporcionar el CDC en data.cdc" });
-                }
                 xmlGenerationPromise = xmlgen.generateXMLEventoCancelacion(json_data.id, json_data.params, json_data.data);
                 break;
             case 'inutilizacion':
@@ -111,16 +108,18 @@ function handleEventData(req, res, eventType, eventName) {
                 errorLogger.error('-----------------------------------------------------------------------');
                 errorLogger.error(`Error al generar XML (${eventType}):\n  ${errorMessage}`);
                 errorLogger.error('-----------------------------------------------------------------------');
+                // Enviar el error detallado en la respuesta JSON
+                res.status(500).json({ error: 'Error al generar XML', details: error.message.split(';') });
             } else {
                 // Registrar error general
                 errorLogger.error(`Error al generar XML (${eventType}): ${error.stack || error.message}`);
+                res.status(500).json({ error: 'Error al generar XML', details: [error.stack || error.message] });
             }
-            res.status(500).json({ error: 'Error al generar XML' });
         });
 
     } catch (error) {
         errorLogger.error('Error en el servidor', { error });
-        res.status(500).json({ error: 'Error en el servidor' });
+        res.status(500).json({ error: 'Error en el servidor', details: [error.message || error] });
     }
 }
 
