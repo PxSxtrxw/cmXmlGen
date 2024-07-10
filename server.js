@@ -91,14 +91,22 @@ function handleEventData(req, res, eventType, eventName) {
 
         xmlGenerationPromise
         .then(xml => {
+            // Limpiar caracteres con tilde
+            const cleanedXml = removeAccents(xml);
             // Mostrar XML generado en la consola
-            const xmlFormatted = formatXml(xml);
+            console.log('-----------------------------------------------------------------------');
+            console.log(`${eventName} - ${eventType}`);
+            console.log('-----------------------------------------------------------------------');
+            console.log('XML generado:\n' + cleanedXml);
+            console.log('-----------------------------------------------------------------------');
+            // Loggear el evento
             infoLogger.info('-----------------------------------------------------------------------');
             infoLogger.info(`${eventName} - ${eventType}`);
             infoLogger.info('-----------------------------------------------------------------------');
-            infoLogger.info('XML generado:\n' + xmlFormatted);
+            infoLogger.info('XML generado:\n' + cleanedXml);
             infoLogger.info('-----------------------------------------------------------------------');
-            res.json({ message: 'XML generado correctamente', xml: xml });
+            // Enviar la respuesta JSON con XML limpio
+            res.json({ message: 'XML generado correctamente', xml: cleanedXml });
         })
         .catch(error => {
             // Capturar errores detallados
@@ -123,9 +131,24 @@ function handleEventData(req, res, eventType, eventName) {
     }
 }
 
-function formatXml(xml) {
-    // Remover saltos de línea y espacios innecesarios
-    return xml.replace(/\s+/g, ' ').trim();
+function removeAccents(text) {
+    // Remover caracteres con tilde
+    const accents = [
+        /[\300-\306]/g, /[\340-\346]/g, // A, a
+        /[\310-\313]/g, /[\350-\353]/g, // E, e
+        /[\314-\317]/g, /[\354-\357]/g, // I, i
+        /[\322-\330]/g, /[\362-\370]/g, // O, o
+        /[\331-\334]/g, /[\371-\374]/g, // U, u
+        /[\321]/g, /[\361]/g, // N, n
+        /[\307]/g, /[\347]/g, // C, c
+    ];
+    const withoutAccents = [
+        'A', 'a', 'E', 'e', 'I', 'i', 'O', 'o', 'U', 'u', 'N', 'n', 'C', 'c'
+    ];
+    accents.forEach((accent, index) => {
+        text = text.replace(accent, withoutAccents[index]);
+    });
+    return text;
 }
 
 // Iniciar el servidor
