@@ -1,40 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const xmlgen = require('facturacionelectronicapy-xmlgen').default || require('facturacionelectronicapy-xmlgen');
-const { createLogger, transports, format } = require('winston');
+const { infoLogger, errorLogger } = require('./logger'); // Importar loggers desde la carpeta 'logs'
 
 const app = express();
 const port = 3001;
 
 app.use(bodyParser.json());
-
-const customFormat = format.printf(info => {
-    return `${info.timestamp} - ${info.level.toUpperCase()} - ${info.message}`;
-});
-
-const infoLogger = createLogger({
-    level: 'info',
-    format: format.combine(
-        format.timestamp(),
-        customFormat
-    ),
-    transports: [
-        new transports.Console(),
-        new transports.File({ filename: 'info.log', level: 'info', maxsize: 5242880, maxFiles: 5 }) // 5MB max size per file, 5 files max
-    ]
-});
-
-const errorLogger = createLogger({
-    level: 'error',
-    format: format.combine(
-        format.timestamp(),
-        customFormat
-    ),
-    transports: [
-        new transports.Console(),
-        new transports.File({ filename: 'error.log', level: 'error', maxsize: 5242880, maxFiles: 5 }) // 5MB max size per file, 5 files max
-    ]
-});
 
 // Rutas para los diferentes eventos y generación de XML
 const eventos = [
@@ -99,7 +71,7 @@ function handleEventData(req, res, eventType, eventName) {
             console.log('-----------------------------------------------------------------------');
             console.log('XML generado:\n' + cleanedXml);
             console.log('-----------------------------------------------------------------------');
-            // Loggear el evento
+            // Loggear el evento usando el logger importado
             infoLogger.info('-----------------------------------------------------------------------');
             infoLogger.info(`${eventName} - ${eventType}`);
             infoLogger.info('-----------------------------------------------------------------------');
