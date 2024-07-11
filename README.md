@@ -52,5 +52,11 @@ El servidor expone varios endpoints para manejar diferentes eventos que requiere
 - `/desconocimiento`: Genera un XML para un evento de desconocimiento.
 - `/notificacion`: Genera un XML para un evento de notificación.
 
+## Logger
+
+el servidor guardara los loggers en una carpte llamada logs y la actividad de errores en `errorLogger.log` y la informacion de toda la actividad del servidor en `eventLogger.log`
+
+
+
 
 
