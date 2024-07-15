@@ -25,6 +25,9 @@ npm install winston
 ```bash
 npm install body-parser
 ```
+```bash
+npm install  xml-js
+```
 ## Configuración
 
 Antes de ejecutar el servidor, asegúrese de configurar adecuadamente los parámetros y datos necesarios según la documentación de la SET. Los datos estáticos del contribuyente emisor (`params`) y los datos variables para cada documento electrónico (`data`) deben estar correctamente estructurados y proporcionados en formato JSON.
