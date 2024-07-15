@@ -1,12 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const xmlgen = require('facturacionelectronicapy-xmlgen').default || require('facturacionelectronicapy-xmlgen');
+const fs = require('fs');
+const path = require('path');
+const xmlParser = require('xml-js');
 const { infoLogger, errorLogger } = require('./logger'); // Importar loggers desde la carpeta 'logs'
 
 const app = express();
 const port = 3001;
 
 app.use(bodyParser.json());
+
+// Crear la carpeta de salida si no existe
+const outputFolderPath = path.join(__dirname, 'output');
+if (!fs.existsSync(outputFolderPath)) {
+    fs.mkdirSync(outputFolderPath);
+}
 
 // Rutas para los diferentes eventos y generación de XML
 const eventos = [
@@ -63,22 +72,49 @@ function handleEventData(req, res, eventType, eventName) {
 
         xmlGenerationPromise
         .then(xml => {
-            // Limpiar caracteres con tilde
-            const cleanedXml = removeAccents(xml);
-            // Mostrar XML generado en la consola
-            console.log('-----------------------------------------------------------------------');
-            console.log(`${eventName} - ${eventType}`);
-            console.log('-----------------------------------------------------------------------');
-            console.log('XML generado:\n' + cleanedXml);
-            console.log('-----------------------------------------------------------------------');
-            // Loggear el evento usando el logger importado
-            infoLogger.info('-----------------------------------------------------------------------');
-            infoLogger.info(`${eventName} - ${eventType}`);
-            infoLogger.info('-----------------------------------------------------------------------');
-            infoLogger.info('XML generado:\n' + cleanedXml);
-            infoLogger.info('-----------------------------------------------------------------------');
-            // Enviar la respuesta JSON con XML limpio
-            res.json({ message: 'XML generado correctamente', xml: cleanedXml });
+            // Parsear el string XML para obtener el valor del atributo Id en <DE>
+            const xmlDoc = xmlParser.xml2js(xml, { compact: true });
+            let idValue;
+
+            if (xmlDoc.rDE && xmlDoc.rDE.DE && xmlDoc.rDE.DE._attributes && xmlDoc.rDE.DE._attributes.Id) {
+                idValue = xmlDoc.rDE.DE._attributes.Id;
+            } else {
+                const errorMessage = 'Missing Id attribute in the <DE> element of the original XML';
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: errorMessage }));
+                errorLogger.error(errorMessage);
+                return;
+            }
+
+            // Construir el nombre del archivo usando Id
+            const filename = `xml-${idValue}.xml`; // Ejemplo: "xml-01022197575001001000000122022081410002983981.xml"
+
+            // Guardar el XML generado en la carpeta output con el nombre generado
+            const filePath = path.join(outputFolderPath, filename);
+            fs.writeFile(filePath, xml, (err) => {
+                if (err) {
+                    const errorMessage = 'Error saving XML';
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: errorMessage }));
+                    errorLogger.error(errorMessage, { error: err });
+                    return;
+                }
+
+                // Mostrar el XML generado por consola
+                console.log("XML generado guardado:", filePath);
+
+                // Loggear el evento usando el logger importado
+                infoLogger.info('-----------------------------------------------------------------------');
+                infoLogger.info(`${eventName} - ${eventType}`);
+                infoLogger.info('-----------------------------------------------------------------------');
+                infoLogger.info('XML generado:\n' + xml);
+                infoLogger.info('-----------------------------------------------------------------------');
+
+                // Responder con el nombre del archivo generado
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ filename }));
+            });
+
         })
         .catch(error => {
             // Capturar errores detallados
@@ -101,26 +137,6 @@ function handleEventData(req, res, eventType, eventName) {
         errorLogger.error('Error en el servidor', { error });
         res.status(500).json({ error: 'Error en el servidor', details: [error.message || error] });
     }
-}
-
-function removeAccents(text) {
-    // Remover caracteres con tilde
-    const accents = [
-        /[\300-\306]/g, /[\340-\346]/g, // A, a
-        /[\310-\313]/g, /[\350-\353]/g, // E, e
-        /[\314-\317]/g, /[\354-\357]/g, // I, i
-        /[\322-\330]/g, /[\362-\370]/g, // O, o
-        /[\331-\334]/g, /[\371-\374]/g, // U, u
-        /[\321]/g, /[\361]/g, // N, n
-        /[\307]/g, /[\347]/g, // C, c
-    ];
-    const withoutAccents = [
-        'A', 'a', 'E', 'e', 'I', 'i', 'O', 'o', 'U', 'u', 'N', 'n', 'C', 'c'
-    ];
-    accents.forEach((accent, index) => {
-        text = text.replace(accent, withoutAccents[index]);
-    });
-    return text;
 }
 
 // Iniciar el servidor
