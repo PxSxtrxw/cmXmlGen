@@ -54,6 +54,9 @@ El servidor expone varios endpoints para manejar diferentes eventos que requiere
 - `/disconformidad`: Genera un XML para un evento de disconformidad.
 - `/desconocimiento`: Genera un XML para un evento de desconocimiento.
 - `/notificacion`: Genera un XML para un evento de notificación.
+  
+### Guardado de Archivos
+Todos los XML generados se guardaran en una carpeta `output` con las iniciales de cada metodo y el numero id del xml correspondiente
 
 ## Logger
 
