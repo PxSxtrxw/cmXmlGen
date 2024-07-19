@@ -72,47 +72,116 @@ function handleEventData(req, res, eventType, eventName) {
 
         xmlGenerationPromise
         .then(xml => {
-            // Parsear el string XML para obtener el valor del atributo Id en <DE>
             const xmlDoc = xmlParser.xml2js(xml, { compact: true });
             let idValue;
 
-            if (xmlDoc.rDE && xmlDoc.rDE.DE && xmlDoc.rDE.DE._attributes && xmlDoc.rDE.DE._attributes.Id) {
-                idValue = xmlDoc.rDE.DE._attributes.Id;
-            } else {
-                const errorMessage = 'Missing Id attribute in the <DE> element of the original XML';
+            switch (eventType) {
+                case 'regular':
+                    if (xmlDoc.rDE && xmlDoc.rDE.DE && xmlDoc.rDE.DE._attributes && xmlDoc.rDE.DE._attributes.Id) {
+                        idValue = xmlDoc.rDE.DE._attributes.Id;
+                    }
+                    break;
+
+                case 'cancelacion':
+                    if (xmlDoc['env:Envelope'] && xmlDoc['env:Envelope']['env:Body'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeCan'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeCan']['Id'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeCan']['Id']._text) {
+                        idValue = xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeCan']['Id']._text;
+                    }
+                    break;
+
+                case 'inutilizacion':
+                    if (xmlDoc['env:Envelope'] &&xmlDoc['env:Envelope']['env:Body'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['_attributes'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['_attributes']['Id']) {
+                        idValue = xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['_attributes']['Id'];
+                    }
+                    break;
+
+                case 'conformidad':
+                    if (xmlDoc['env:Envelope'] && xmlDoc['env:Envelope']['env:Body'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeConf'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeConf']['Id']) {
+                        idValue = xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeConf']['Id']._text;
+                    }
+                    break;
+
+                 case 'disconformidad':
+                    if (xmlDoc['env:Envelope'] && xmlDoc['env:Envelope']['env:Body'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeDisconf'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeDisconf']['Id']) {
+                        idValue = xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeDisconf']['Id']._text;
+                    }
+                    break;
+                    
+                case 'desconocimiento':
+                    if (xmlDoc['env:Envelope'] && xmlDoc['env:Envelope']['env:Body'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeDescon'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeDescon']['Id']) {
+                        idValue = xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeDescon']['Id']._text;
+                    }
+                    break;
+                    
+                case 'notificacion':
+                    if (xmlDoc['env:Envelope'] && xmlDoc['env:Envelope']['env:Body'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve'] && xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeNotRec'] &&xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeNotRec']['Id']) {
+                        idValue = xmlDoc['env:Envelope']['env:Body']['rEnviEventoDe']['dEvReg']['gGroupGesEve']['rGesEve']['rEve']['gGroupTiEvt']['rGeVeNotRec']['Id']._text;
+                    }
+                    break;
+                    
+                default:
+                    const errorMessage = 'Estructura XML no reconocida para este tipo de evento';
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: errorMessage }));
+                    errorLogger.error(errorMessage);
+                    return;
+            }
+
+            if (!idValue) {
+                const errorMessage = 'Missing Id attribute in the XML';
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: errorMessage }));
                 errorLogger.error(errorMessage);
                 return;
             }
 
-            // Construir el nombre del archivo usando Id
-            const filename = `xml-${idValue}.xml`; // Ejemplo: "xml-01022197575001001000000122022081410002983981.xml"
-
-            // Guardar el XML generado en la carpeta output con el nombre generado
+            const filename = `xml-${eventType.slice(0, 4)}-${idValue}.xml`;
             const filePath = path.join(outputFolderPath, filename);
-            fs.writeFile(filePath, xml, (err) => {
-                if (err) {
-                    const errorMessage = 'Error saving XML';
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: errorMessage }));
-                    errorLogger.error(errorMessage, { error: err });
-                    return;
+
+            // Verificar si el archivo ya existe
+            fs.access(filePath, fs.constants.F_OK, (err) => {
+                if (!err) {
+                    // El archivo ya existe
+                    console.log("El archivo XML ya existe. Mostrando contenido:");
+
+                    // Mostrar el XML generado anteriormente por consola
+                    fs.readFile(filePath, 'utf8', (readErr, existingXml) => {
+                        if (readErr) {
+                            errorLogger.error('Error al leer el XML existente', { error: readErr });
+                            res.status(500).json({ error: 'Error al leer el XML existente' });
+                            return;
+                        }
+
+                        console.log(existingXml);
+
+                        // Responder al cliente indicando que el archivo ya existe
+                        res.status(200).json({ message: 'El XML ya se ha generado', filename });
+                    });
+
+                } else {
+                    // Guardar el XML generado en la carpeta output con el nombre generado
+                    fs.writeFile(filePath, xml, (err) => {
+                        if (err) {
+                            const errorMessage = 'Error saving XML';
+                            res.writeHead(500, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: errorMessage }));
+                            errorLogger.error(errorMessage, { error: err });
+                            return;
+                        }
+
+                        console.log("XML generado guardado:", filePath);
+
+                        // Loggear el evento usando el logger importado
+                        infoLogger.info('-----------------------------------------------------------------------');
+                        infoLogger.info(`${eventName} - ${eventType}`);
+                        infoLogger.info('-----------------------------------------------------------------------');
+                        infoLogger.info('XML generado:\n' + xml);
+                        infoLogger.info('-----------------------------------------------------------------------');
+
+                        // Responder con el nombre del archivo generado
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ filename }));
+                    });
                 }
-
-                // Mostrar el XML generado por consola
-                console.log("XML generado guardado:", filePath);
-
-                // Loggear el evento usando el logger importado
-                infoLogger.info('-----------------------------------------------------------------------');
-                infoLogger.info(`${eventName} - ${eventType}`);
-                infoLogger.info('-----------------------------------------------------------------------');
-                infoLogger.info('XML generado:\n' + xml);
-                infoLogger.info('-----------------------------------------------------------------------');
-
-                // Responder con el nombre del archivo generado
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ filename }));
             });
 
         })
@@ -135,11 +204,11 @@ function handleEventData(req, res, eventType, eventName) {
 
     } catch (error) {
         errorLogger.error('Error en el servidor', { error });
-        res.status(500).json({ error: 'Error en el servidor', details: [error.message || error] });
+        res.status(500).json({ error: 'Error en el servidor', details: [error.message] });
     }
 }
 
 // Iniciar el servidor
 app.listen(port, () => {
-    infoLogger.info(`Servidor escuchando en http://localhost:${port}`);
+    console.log(`Servidor iniciado en http://localhost:${port}`);
 });
